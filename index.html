@@ -6,26 +6,28 @@
 <title>RedScan — NSE F&O Bearish Candle Screener</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap');
-:root{--bg:#09090c;--surf:#111318;--bdr:#1c2030;--red:#ff3344;--grn:#00e67a;--amb:#ffb700;--txt:#dde2ee;--mut:#4a5568;}
+:root{--bg:#09090c;--surf:#111318;--bdr:#1c2030;--red:#ff3344;--grn:#00e67a;--amb:#ffb700;--txt:#dde2ee;--mut:#4a5568;--dark-red:#cc2233;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--txt);font-family:'Space Mono',monospace;min-height:100vh;}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 40% at 10% -5%,rgba(255,51,68,.07) 0%,transparent 55%);pointer-events:none;z-index:0;}
 
-.hdr{position:relative;z-index:1;padding:26px 36px 20px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.hdr{position:relative;z-index:1;padding:26px 36px 20px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:space-between;}
 .hdr h1{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;letter-spacing:-1px;}
 .hdr h1 span{color:var(--red);}
 .hdr p{font-size:.62rem;color:var(--mut);letter-spacing:2px;text-transform:uppercase;margin-top:3px;}
-.badge{margin-left:auto;background:rgba(0,230,122,.08);border:1px solid rgba(0,230,122,.3);color:var(--grn);font-size:.6rem;padding:4px 12px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;}
+.badge{background:rgba(0,230,122,.08);border:1px solid rgba(0,230,122,.3);color:var(--grn);font-size:.6rem;padding:4px 12px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;}
 
 .ctrl{position:relative;z-index:1;padding:18px 36px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;border-bottom:1px solid var(--bdr);}
 .cg{display:flex;flex-direction:column;gap:5px;}
 .cg label{font-size:.58rem;color:var(--mut);letter-spacing:1.5px;text-transform:uppercase;}
-select,input{font-family:'Space Mono',monospace;font-size:.76rem;background:var(--surf);border:1px solid var(--bdr);color:var(--txt);padding:8px 13px;border-radius:3px;cursor:pointer;transition:border .2s;}
+select,input{font-family:'Space Mono',monospace;font-size:.76rem;background:var(--surf);border:1px solid var(--bdr);color:var(--txt);padding:8px 13px;border-radius:3px;cursor:pointer;transition:border-color .2s;min-width:155px;}
 select:focus,input:focus{outline:none;border-color:var(--red);}
 .btn{font-family:'Syne',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:1px;text-transform:uppercase;background:var(--red);color:#fff;border:none;padding:9px 26px;border-radius:3px;cursor:pointer;transition:all .2s;}
 .btn:hover{box-shadow:0 0 18px rgba(255,51,68,.4);transform:translateY(-1px);}
 .btn:active{transform:translateY(0);}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn.secondary{background:var(--surf);color:var(--txt);border:1px solid var(--bdr);}
+.btn.secondary:hover{border-color:var(--red);box-shadow:0 0 12px rgba(255,51,68,.2);}
 
 main{position:relative;z-index:1;padding:24px 36px;}
 .sbar{display:flex;align-items:center;gap:9px;font-size:.7rem;color:var(--mut);margin-bottom:18px;min-height:18px;}
@@ -45,7 +47,7 @@ main{position:relative;z-index:1;padding:24px 36px;}
 table{width:100%;border-collapse:collapse;font-size:.77rem;}
 thead tr{background:var(--surf);border-bottom:2px solid var(--bdr);}
 th{padding:11px 14px;text-align:left;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);white-space:nowrap;}
-tbody tr{border-bottom:1px solid var(--bdr);transition:background .15s;}
+tbody tr{border-bottom:1px solid var(--bdr);transition:background .15s;cursor:pointer;}
 tbody tr:hover{background:rgba(255,51,68,.03);}
 tbody tr:last-child{border-bottom:none;}
 td{padding:12px 14px;vertical-align:middle;}
@@ -53,7 +55,7 @@ td{padding:12px 14px;vertical-align:middle;}
 .co{font-size:.62rem;color:var(--mut);margin-top:2px;}
 .neg{color:var(--red);font-weight:700;}
 .pos{color:var(--grn);font-weight:700;}
-.cds{display:flex;gap:3px;}
+.cds{display:flex;gap:3px;flex-wrap:wrap;}
 .cp{width:24px;height:24px;border-radius:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;line-height:1;}
 .cp.R{background:rgba(255,51,68,.13);border:1px solid var(--red);color:var(--red);}
 .cp.G{background:rgba(0,230,122,.08);border:1px solid rgba(0,230,122,.35);color:var(--grn);}
@@ -75,7 +77,22 @@ td{padding:12px 14px;vertical-align:middle;}
 .sk td{background:linear-gradient(90deg,var(--bdr) 25%,var(--surf) 50%,var(--bdr) 75%);background-size:200% 100%;animation:shim 1.3s infinite;height:44px;color:transparent;}
 @keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-@media(max-width:600px){.hdr,.ctrl,main{padding-left:14px;padding-right:14px;}}
+.toolbar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
+.toolbar .info{font-size:.65rem;color:var(--mut);}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;}
+.modal.show{display:flex;}
+.modal-content{background:var(--surf);border:1px solid var(--bdr);border-radius:6px;padding:24px;max-width:90%;max-height:80vh;overflow-y:auto;position:relative;}
+.modal-close{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--mut);cursor:pointer;font-size:1.2rem;}
+.modal-close:hover{color:var(--txt);}
+
+@media(max-width:600px){
+  .hdr,.ctrl,main{padding-left:14px;padding-right:14px;}
+  .hdr{flex-direction:column;align-items:flex-start;}
+  .hdr .badge{margin-left:0;}
+  .ctrl{flex-direction:column;align-items:stretch;}
+  select{min-width:auto;width:100%;}
+}
 </style>
 </head>
 <body>
@@ -92,6 +109,7 @@ td{padding:12px 14px;vertical-align:middle;}
   <div class="cg">
     <label>Index</label>
     <select id="idxSel">
+      <option value="fno" selected>All F&amp;O Stocks (~170)</option>
       <option value="nifty50">Nifty 50</option>
       <option value="banknifty">Nifty Bank</option>
       <option value="nifty100">Nifty 100</option>
@@ -109,6 +127,7 @@ td{padding:12px 14px;vertical-align:middle;}
     </select>
   </div>
   <button class="btn" id="runBtn" onclick="runScan()">▶ Scan Now</button>
+  <button class="btn secondary" id="exportBtn" onclick="exportResults()" style="display:none;">⬇ Export CSV</button>
 </div>
 
 <main>
@@ -131,12 +150,24 @@ td{padding:12px 14px;vertical-align:middle;}
   </div>
 
   <div class="note" id="configNote" style="display:none">
-    <b>⚙️ Setup required:</b> Edit the <code>API_BASE</code> constant.
+    <b>⚙️ Setup required:</b> Edit the <code>API_BASE</code> constant at the top of the <code>&lt;script&gt;</code> in this file to point to your deployed backend URL.
   </div>
 </main>
 
+<div id="detailModal" class="modal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
 <script>
+// ─────────────────────────────────────────────────────────
+// ⚙️ CONFIGURE THIS: paste your deployed backend URL here
+// Example: const API_BASE = "https://redscan-backend.onrender.com";
+// ─────────────────────────────────────────────────────────
 const API_BASE = "https://three-red-candle.onrender.com";
+let lastResults = [];
 
 function setStatus(msg, cls=''){
   document.getElementById('sb').className = 'sbar ' + cls;
@@ -154,8 +185,19 @@ async function runScan(){
   const idx = document.getElementById('idxSel').value;
   const minRed = document.getElementById('redSel').value;
   const btn = document.getElementById('runBtn');
+  const exportBtn = document.getElementById('exportBtn');
 
-  btn.disabled = true; btn.textContent = '⏳ Scanning...';
+  if(API_BASE.includes('your-backend-url') || API_BASE.includes('localhost') === false && API_BASE.includes('onrender') === false){
+    // Allow both localhost and production URLs
+    if(!API_BASE.includes('localhost') && !API_BASE.includes('onrender') && !API_BASE.includes('http')){
+      setStatus('⚠ Backend URL not configured', 'err');
+      return;
+    }
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Scanning...';
+  exportBtn.style.display = 'none';
   document.getElementById('statsBox').style.display = 'none';
   skeleton();
   setStatus(`Fetching live data for ${idx}... (may take 10-30s on free hosting cold start)`, 'run');
@@ -166,6 +208,7 @@ async function runScan(){
     if(!res.ok) throw new Error(`Server returned ${res.status}`);
     const data = await res.json();
 
+    lastResults = data.results || [];
     document.getElementById('statsBox').style.display = 'flex';
     document.getElementById('sFound').textContent = data.totalMatched;
     document.getElementById('sScanned').textContent = data.totalScanned;
@@ -178,8 +221,12 @@ async function runScan(){
         <p>No stocks in <b>${data.index}</b> had ${minRed}+ consecutive red candles.<br>
         Market may be bullish/sideways. Try a lower number.</p></div>`;
     } else {
-      setStatus(`✓ Found ${data.totalMatched} stock${data.totalMatched>1?'s':''} with ${minRed}+ red candles in ${data.index}`, 'ok');
+      const srcNote = data.fnoListSource === 'fallback'
+        ? ' (using cached F&O list — NSE source temporarily unavailable)'
+        : data.fnoListSource === 'live' ? ' (live F&O list from NSE)' : '';
+      setStatus(`✓ Found ${data.totalMatched} stock${data.totalMatched>1?'s':''} with ${minRed}+ red candles in ${data.index}${srcNote}`, 'ok');
       renderTable(data.results);
+      exportBtn.style.display = 'inline-block';
     }
   } catch(e){
     setStatus('Error: ' + e.message, 'err');
@@ -187,15 +234,16 @@ async function runScan(){
       <p style="color:var(--red)">Could not reach backend.<br>${e.message}</p>
       <p style="margin-top:10px">If using a free host (Render/Railway), the server may need 10-30s to "wake up" on first request — try again.</p></div>`;
   } finally {
-    btn.disabled = false; btn.textContent = '▶ Scan Now';
+    btn.disabled = false;
+    btn.textContent = '▶ Scan Now';
   }
 }
 
 function renderTable(results){
-  const rows = results.map(s=>{
+  const rows = results.map((s, idx)=>{
     const pips = s.candles.map(c=>`<div class="cp ${c.red?'R':'G'}"><span>${c.red?'▼':'▲'}</span><small>${c.date}</small></div>`).join('');
     const chgStr = s.changePct!=null ? (s.changePct>=0?'+':'')+s.changePct.toFixed(2)+'%' : '—';
-    return `<tr>
+    return `<tr onclick="showDetail(${idx})">
       <td><div class="sym">${s.symbol}</div><div class="co">${s.name}</div></td>
       <td>₹${s.price!=null?s.price.toFixed(2):'—'}</td>
       <td class="${(s.changePct||0)<0?'neg':'pos'}">${chgStr}</td>
@@ -210,6 +258,97 @@ function renderTable(results){
     <tbody>${rows}</tbody>
   </table></div>`;
 }
+
+function showDetail(idx){
+  const s = lastResults[idx];
+  const candleDetails = s.candles.map(c => `
+    <tr>
+      <td>${c.date}</td>
+      <td class="${c.red?'neg':'pos'}">${c.red?'Red ▼':'Green ▲'}</td>
+      <td>₹${c.open?.toFixed(2) || '—'}</td>
+      <td>₹${c.high?.toFixed(2) || '—'}</td>
+      <td>₹${c.low?.toFixed(2) || '—'}</td>
+      <td>₹${c.close?.toFixed(2) || '—'}</td>
+    </tr>
+  `).join('');
+
+  const html = `
+    <h2 style="color:var(--red);margin-bottom:16px;">${s.symbol} — ${s.name}</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+      <div>
+        <div style="font-size:.65rem;color:var(--mut);text-transform:uppercase;letter-spacing:1px;">Current Price</div>
+        <div style="font-size:1.4rem;font-weight:bold;color:var(--grn);margin-top:4px;">₹${s.price?.toFixed(2) || '—'}</div>
+      </div>
+      <div>
+        <div style="font-size:.65rem;color:var(--mut);text-transform:uppercase;letter-spacing:1px;">24h Change</div>
+        <div style="font-size:1.4rem;font-weight:bold;color:${(s.changePct||0)<0?'var(--red)':'var(--grn)'};margin-top:4px;">${s.changePct!=null ? (s.changePct>=0?'+':'')+s.changePct.toFixed(2)+'%' : '—'}</div>
+      </div>
+      <div>
+        <div style="font-size:.65rem;color:var(--mut);text-transform:uppercase;letter-spacing:1px;">Red Streak</div>
+        <div style="font-size:1.4rem;font-weight:bold;color:var(--red);margin-top:4px;">${s.redStreak} days</div>
+      </div>
+      <div>
+        <div style="font-size:.65rem;color:var(--mut);text-transform:uppercase;letter-spacing:1px;">Index</div>
+        <div style="font-size:.9rem;color:var(--amb);margin-top:4px;">${s.indexMember}</div>
+      </div>
+    </div>
+    <h3 style="font-size:.85rem;color:var(--txt);margin:20px 0 12px;text-transform:uppercase;letter-spacing:1px;">Candle History</h3>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;font-size:.7rem;">
+        <thead>
+          <tr style="background:var(--bdr);">
+            <th style="padding:8px;text-align:left;">Date</th>
+            <th style="padding:8px;text-align:left;">Status</th>
+            <th style="padding:8px;text-align:left;">Open</th>
+            <th style="padding:8px;text-align:left;">High</th>
+            <th style="padding:8px;text-align:left;">Low</th>
+            <th style="padding:8px;text-align:left;">Close</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${candleDetails}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('detailModal').classList.add('show');
+}
+
+function closeModal(){
+  document.getElementById('detailModal').classList.remove('show');
+}
+
+function exportResults(){
+  if(lastResults.length === 0) return;
+
+  const header = ['Symbol', 'Name', 'Price', 'Change %', 'Red Streak', 'Index Member'];
+  const rows = lastResults.map(s => [
+    s.symbol,
+    s.name,
+    s.price?.toFixed(2) || '—',
+    s.changePct?.toFixed(2) || '—',
+    s.redStreak,
+    s.indexMember
+  ]);
+
+  const csv = [header, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `redscan-results-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Close modal when clicking outside
+document.getElementById('detailModal').addEventListener('click', (e) => {
+  if(e.target.id === 'detailModal') closeModal();
+});
 </script>
 </body>
 </html>
