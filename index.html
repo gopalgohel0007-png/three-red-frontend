@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RedScan — NSE F&O Bearish Candle Screener</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap');
+:root{--bg:#09090c;--surf:#111318;--bdr:#1c2030;--red:#ff3344;--grn:#00e67a;--amb:#ffb700;--txt:#dde2ee;--mut:#4a5568;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:'Space Mono',monospace;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 40% at 10% -5%,rgba(255,51,68,.07) 0%,transparent 55%);pointer-events:none;z-index:0;}
+
+.hdr{position:relative;z-index:1;padding:26px 36px 20px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.hdr h1{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;letter-spacing:-1px;}
+.hdr h1 span{color:var(--red);}
+.hdr p{font-size:.62rem;color:var(--mut);letter-spacing:2px;text-transform:uppercase;margin-top:3px;}
+.badge{margin-left:auto;background:rgba(0,230,122,.08);border:1px solid rgba(0,230,122,.3);color:var(--grn);font-size:.6rem;padding:4px 12px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;}
+
+.ctrl{position:relative;z-index:1;padding:18px 36px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;border-bottom:1px solid var(--bdr);}
+.cg{display:flex;flex-direction:column;gap:5px;}
+.cg label{font-size:.58rem;color:var(--mut);letter-spacing:1.5px;text-transform:uppercase;}
+select,input{font-family:'Space Mono',monospace;font-size:.76rem;background:var(--surf);border:1px solid var(--bdr);color:var(--txt);padding:8px 13px;border-radius:3px;cursor:pointer;transition:border .2s;}
+select:focus,input:focus{outline:none;border-color:var(--red);}
+.btn{font-family:'Syne',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:1px;text-transform:uppercase;background:var(--red);color:#fff;border:none;padding:9px 26px;border-radius:3px;cursor:pointer;transition:all .2s;}
+.btn:hover{box-shadow:0 0 18px rgba(255,51,68,.4);transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+
+main{position:relative;z-index:1;padding:24px 36px;}
+.sbar{display:flex;align-items:center;gap:9px;font-size:.7rem;color:var(--mut);margin-bottom:18px;min-height:18px;}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--mut);flex-shrink:0;}
+.sbar.run .sdot{background:var(--amb);animation:pulse .7s alternate infinite;}
+.sbar.ok .sdot{background:var(--grn);}
+.sbar.err .sdot{background:var(--red);}
+@keyframes pulse{from{opacity:1;box-shadow:0 0 5px var(--amb)}to{opacity:.3;box-shadow:none}}
+
+.stats{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+.stat{background:var(--surf);border:1px solid var(--bdr);border-radius:4px;padding:13px 18px;min-width:110px;}
+.stat .n{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;line-height:1;}
+.stat .n.r{color:var(--red)}.stat .n.g{color:var(--grn)}.stat .n.a{color:var(--amb)}
+.stat .l{font-size:.58rem;color:var(--mut);letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+
+.tw{overflow-x:auto;border:1px solid var(--bdr);border-radius:4px;}
+table{width:100%;border-collapse:collapse;font-size:.77rem;}
+thead tr{background:var(--surf);border-bottom:2px solid var(--bdr);}
+th{padding:11px 14px;text-align:left;font-size:.58rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--bdr);transition:background .15s;}
+tbody tr:hover{background:rgba(255,51,68,.03);}
+tbody tr:last-child{border-bottom:none;}
+td{padding:12px 14px;vertical-align:middle;}
+.sym{font-weight:700;font-size:.83rem;}
+.co{font-size:.62rem;color:var(--mut);margin-top:2px;}
+.neg{color:var(--red);font-weight:700;}
+.pos{color:var(--grn);font-weight:700;}
+.cds{display:flex;gap:3px;}
+.cp{width:24px;height:24px;border-radius:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;line-height:1;}
+.cp.R{background:rgba(255,51,68,.13);border:1px solid var(--red);color:var(--red);}
+.cp.G{background:rgba(0,230,122,.08);border:1px solid rgba(0,230,122,.35);color:var(--grn);}
+.cp small{font-size:.5rem;color:var(--mut);margin-top:1px;}
+.tag{display:inline-block;font-size:.56rem;padding:2px 7px;border-radius:2px;letter-spacing:.5px;border:1px solid rgba(255,183,0,.3);background:rgba(255,183,0,.07);color:var(--amb);margin:2px;}
+.tag.f{border-color:rgba(0,230,122,.3);background:rgba(0,230,122,.06);color:var(--grn);}
+
+.empty{text-align:center;padding:60px 20px;color:var(--mut);}
+.empty .ico{font-size:2.5rem;margin-bottom:12px;}
+.empty p{font-size:.73rem;line-height:2;}
+
+.note{margin-top:24px;padding:13px 16px;border:1px solid var(--bdr);border-radius:4px;font-size:.65rem;color:var(--mut);line-height:1.9;}
+.note b{color:var(--amb);}
+.note.warn{border-color:rgba(255,51,68,.3);background:rgba(255,51,68,.04);}
+.note.warn b{color:var(--red);}
+
+.streak{color:var(--red);font-weight:700;font-size:1rem;}
+
+.sk td{background:linear-gradient(90deg,var(--bdr) 25%,var(--surf) 50%,var(--bdr) 75%);background-size:200% 100%;animation:shim 1.3s infinite;height:44px;color:transparent;}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+@media(max-width:600px){.hdr,.ctrl,main{padding-left:14px;padding-right:14px;}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <h1>RED<span>SCAN</span></h1>
+    <p>NSE F&amp;O · Consecutive Bearish Candle Screener</p>
+  </div>
+  <div class="badge">● Live Backend</div>
+</div>
+
+<div class="ctrl">
+  <div class="cg">
+    <label>Index</label>
+    <select id="idxSel">
+      <option value="nifty50">Nifty 50</option>
+      <option value="banknifty">Nifty Bank</option>
+      <option value="nifty100">Nifty 100</option>
+      <option value="sensex">Sensex 30</option>
+    </select>
+  </div>
+  <div class="cg">
+    <label>Min Red Candles</label>
+    <select id="redSel">
+      <option value="1">1+ days</option>
+      <option value="2">2+ days</option>
+      <option value="3" selected>3+ days</option>
+      <option value="4">4+ days</option>
+      <option value="5">5+ days</option>
+    </select>
+  </div>
+  <button class="btn" id="runBtn" onclick="runScan()">▶ Scan Now</button>
+</div>
+
+<main>
+  <div class="sbar" id="sb"><div class="sdot"></div><span id="stxt">Press Scan Now to fetch live data</span></div>
+
+  <div class="stats" id="statsBox" style="display:none">
+    <div class="stat"><div class="n r" id="sFound">0</div><div class="l">Matched</div></div>
+    <div class="stat"><div class="n a" id="sScanned">0</div><div class="l">Scanned</div></div>
+    <div class="stat"><div class="n r" id="sFail">0</div><div class="l">Failed</div></div>
+    <div class="stat"><div class="n" id="sTime" style="font-size:.85rem">—</div><div class="l">Updated</div></div>
+  </div>
+
+  <div id="tbox">
+    <div class="empty">
+      <div class="ico">📉</div>
+      <p>Backend fetches live OHLC from Yahoo Finance server-side<br>
+      and counts <b>consecutive red candles</b> (Close &lt; Open, daily timeframe)<br>
+      for F&amp;O eligible NSE index stocks.</p>
+    </div>
+  </div>
+
+  <div class="note" id="configNote" style="display:none">
+    <b>⚙️ Setup required:</b> Edit the <code>API_BASE</code> constant.
+  </div>
+</main>
+
+<script>
+const API_BASE = "https://three-red-candle.onrender.com";
+
+function setStatus(msg, cls=''){
+  document.getElementById('sb').className = 'sbar ' + cls;
+  document.getElementById('stxt').textContent = msg;
+}
+
+function skeleton(){
+  const rows = Array(8).fill(`<tr class="sk">${Array(6).fill('<td>x</td>').join('')}</tr>`).join('');
+  document.getElementById('tbox').innerHTML = `<div class="tw"><table>
+    <thead><tr><th>Symbol</th><th>Price (₹)</th><th>Change</th><th>Red Streak</th><th>Last 5 Days</th><th>Tags</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+async function runScan(){
+  const idx = document.getElementById('idxSel').value;
+  const minRed = document.getElementById('redSel').value;
+  const btn = document.getElementById('runBtn');
+
+  btn.disabled = true; btn.textContent = '⏳ Scanning...';
+  document.getElementById('statsBox').style.display = 'none';
+  skeleton();
+  setStatus(`Fetching live data for ${idx}... (may take 10-30s on free hosting cold start)`, 'run');
+
+  try {
+    const url = `${API_BASE}/api/scan?index=${idx}&minRed=${minRed}`;
+    const res = await fetch(url, {signal: AbortSignal.timeout(60000)});
+    if(!res.ok) throw new Error(`Server returned ${res.status}`);
+    const data = await res.json();
+
+    document.getElementById('statsBox').style.display = 'flex';
+    document.getElementById('sFound').textContent = data.totalMatched;
+    document.getElementById('sScanned').textContent = data.totalScanned;
+    document.getElementById('sFail').textContent = data.totalFailed;
+    document.getElementById('sTime').textContent = data.scanTime;
+
+    if(data.totalMatched === 0){
+      setStatus(`✓ Scan done — 0 stocks with ${minRed}+ red candles (${data.totalScanned} scanned, ${data.totalFailed} failed)`, 'ok');
+      document.getElementById('tbox').innerHTML = `<div class="empty"><div class="ico">✅</div>
+        <p>No stocks in <b>${data.index}</b> had ${minRed}+ consecutive red candles.<br>
+        Market may be bullish/sideways. Try a lower number.</p></div>`;
+    } else {
+      setStatus(`✓ Found ${data.totalMatched} stock${data.totalMatched>1?'s':''} with ${minRed}+ red candles in ${data.index}`, 'ok');
+      renderTable(data.results);
+    }
+  } catch(e){
+    setStatus('Error: ' + e.message, 'err');
+    document.getElementById('tbox').innerHTML = `<div class="empty"><div class="ico">⚠️</div>
+      <p style="color:var(--red)">Could not reach backend.<br>${e.message}</p>
+      <p style="margin-top:10px">If using a free host (Render/Railway), the server may need 10-30s to "wake up" on first request — try again.</p></div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = '▶ Scan Now';
+  }
+}
+
+function renderTable(results){
+  const rows = results.map(s=>{
+    const pips = s.candles.map(c=>`<div class="cp ${c.red?'R':'G'}"><span>${c.red?'▼':'▲'}</span><small>${c.date}</small></div>`).join('');
+    const chgStr = s.changePct!=null ? (s.changePct>=0?'+':'')+s.changePct.toFixed(2)+'%' : '—';
+    return `<tr>
+      <td><div class="sym">${s.symbol}</div><div class="co">${s.name}</div></td>
+      <td>₹${s.price!=null?s.price.toFixed(2):'—'}</td>
+      <td class="${(s.changePct||0)<0?'neg':'pos'}">${chgStr}</td>
+      <td><span class="streak">${s.redStreak}</span> <span style="color:var(--mut);font-size:.65rem">days</span></td>
+      <td><div class="cds">${pips}</div></td>
+      <td><span class="tag">${s.indexMember}</span><span class="tag f">F&amp;O ✓</span></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('tbox').innerHTML = `<div class="tw"><table>
+    <thead><tr><th>Symbol</th><th>Price (₹)</th><th>Change</th><th>Red Streak</th><th>Last 5 Days (O→C)</th><th>Tags</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+</script>
+</body>
+</html>
